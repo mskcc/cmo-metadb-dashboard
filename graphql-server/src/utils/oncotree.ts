@@ -1,9 +1,12 @@
 import fetch from "node-fetch";
 import NodeCache from "node-cache";
 import { props } from "./constants";
-import { InputMaybe, SampleWhere } from "../generated/graphql";
-import { GraphQLWhereArg } from "@neo4j/graphql";
-import { neo4jDriver } from "./servers";
+import {
+  InputMaybe,
+  SampleMetadataWhere,
+  SampleWhere,
+} from "../generated/graphql";
+import { GraphQLWhereArg } from "@neo4j/graphql/dist/types";
 
 /**
  * Source: https://oncotree.mskcc.org/#/home?tab=api

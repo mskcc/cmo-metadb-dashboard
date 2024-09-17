@@ -16,6 +16,65 @@ function requestFilterWhereVariables(
   parsedSearchVals: string[]
 ): RequestWhere[] {
   if (parsedSearchVals.length > 1) {
+    // search term 08944_b 16167
+
+    // these are just the string names of the members of RequestWhere but we want to be able to make these usable..
+    var typenames = [
+      "igoProjectId",
+      "igoRequestId",
+      "projectManagerName",
+      "investigatorName",
+      "piEmail",
+      "dataAnalystName",
+      "dataAnalystEmail",
+      "genePanel",
+      "labHeadName",
+      "labHeadEmail",
+      "qcAccessEmails",
+      "dataAccessEmails",
+      "otherContactEmails",
+    ];
+    var queryTerms = typenames.map((tn) => {
+      return `${tn}` + "_MATCHES";
+    });
+
+    // query terms looks like: [
+    //     "igoProjectId_MATCHES",
+    //     "igoRequestId_MATCHES",
+    //     "projectManagerName_MATCHES",
+    //     "investigatorName_MATCHES",
+    //     "piEmail_MATCHES",
+    //     "dataAnalystName_MATCHES",
+    //     "dataAnalystEmail_MATCHES",
+    //     "genePanel_MATCHES",
+    //     "labHeadName_MATCHES",
+    //     "labHeadEmail_MATCHES",
+    //     "qcAccessEmails_MATCHES",
+    //     "dataAccessEmails_MATCHES",
+    //     "otherContactEmails_MATCHES"
+    // ]
+
+    // goal is to build a list of the above query terms for every parsed search value entered by the user...
+    // ex: [ {igoProjectId_MATCHES: searchTerm1}, {igoProjectId_MATCHES: searchTerm2}, {igoRequestId_MATCHES: searchTerm1}, {igoRequestId_MATCHES: searchTerm2},  etc]
+
+    let compiledQuery = new Array();
+
+    for (var i = 0; i < queryTerms.length; i++) {
+      for (var j = 0; j < parsedSearchVals.length; j++) {
+        console.log("query term....", queryTerms[i]);
+        let val = parsedSearchVals[j];
+        // `${queryTerms[i]}`: val
+        let m = `\{ ${queryTerms[i]} \: \"${val}\" \}`;
+        compiledQuery.push(m);
+      }
+    }
+
+    console.log("\n\nCOMPILED QUERY TERMS!");
+    console.log(queryTerms);
+
+    console.log("compiled query", compiledQuery);
+
+    // this type of WHERE clause means we're only allow exact matches and not using the regex pattern matching
     return [
       { igoProjectId_IN: parsedSearchVals },
       { igoRequestId_IN: parsedSearchVals },
@@ -34,6 +93,7 @@ function requestFilterWhereVariables(
     ];
   }
 
+  /// we want to be able to match on a regex OR match on CONTAINS...
   if (parsedSearchVals.length === 1) {
     return [
       { igoProjectId_CONTAINS: parsedSearchVals[0] },
@@ -50,6 +110,21 @@ function requestFilterWhereVariables(
       { qcAccessEmails_CONTAINS: parsedSearchVals[0] },
       { dataAccessEmails_CONTAINS: parsedSearchVals[0] },
       { otherContactEmails_CONTAINS: parsedSearchVals[0] },
+      // matches
+      { igoProjectId_MATCHES: `(?i)${parsedSearchVals[0]}.*` },
+      { igoRequestId_MATCHES: `(?i)${parsedSearchVals[0]}.*` },
+      { projectManagerName_MATCHES: `(?i)${parsedSearchVals[0]}.*` },
+      { investigatorName_MATCHES: `(?i)${parsedSearchVals[0]}.*` },
+      { investigatorEmail_MATCHES: `(?i)${parsedSearchVals[0]}.*` },
+      { piEmail_MATCHES: `(?i)${parsedSearchVals[0]}.*` },
+      { dataAnalystName_MATCHES: `(?i)${parsedSearchVals[0]}.*` },
+      { dataAnalystEmail_MATCHES: `(?i)${parsedSearchVals[0]}.*` },
+      { genePanel_MATCHES: `(?i)${parsedSearchVals[0]}.*` },
+      { labHeadName_MATCHES: `(?i)${parsedSearchVals[0]}.*` },
+      { labHeadEmail_MATCHES: `(?i)${parsedSearchVals[0]}.*` },
+      { qcAccessEmails_MATCHES: `(?i)${parsedSearchVals[0]}.*` },
+      { dataAccessEmails_MATCHES: `(?i)${parsedSearchVals[0]}.*` },
+      { otherContactEmails_MATCHES: `(?i)${parsedSearchVals[0]}.*` },
     ];
   }
 
