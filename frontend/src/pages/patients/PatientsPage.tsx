@@ -29,41 +29,20 @@ export type PatientIdsTriplet = {
 function patientFilterWhereVariables(
   parsedSearchVals: string[]
 ): PatientWhere[] {
-  if (parsedSearchVals.length > 1) {
-    return [
-      {
-        patientAliasesIsAlias_SOME: {
-          value_IN: parsedSearchVals,
+  return parsedSearchVals.flatMap((searchVal) => [
+    {
+      patientAliasesIsAlias_SOME: {
+        value_MATCHES: `(?i).*${searchVal}.*`,
+      },
+    },
+    {
+      hasSampleSamples_SOME: {
+        hasMetadataSampleMetadata_SOME: {
+          cmoSampleName_MATCHES: `(?i).*${searchVal}.*`,
         },
       },
-      {
-        hasSampleSamples_SOME: {
-          hasMetadataSampleMetadata_SOME: {
-            cmoSampleName_IN: parsedSearchVals,
-          },
-        },
-      },
-    ];
-  }
-
-  if (parsedSearchVals.length === 1) {
-    return [
-      {
-        patientAliasesIsAlias_SOME: {
-          value_CONTAINS: parsedSearchVals[0],
-        },
-      },
-      {
-        hasSampleSamples_SOME: {
-          hasMetadataSampleMetadata_SOME: {
-            cmoSampleName_CONTAINS: parsedSearchVals[0],
-          },
-        },
-      },
-    ];
-  }
-
-  return [];
+    },
+  ]);
 }
 
 function addCDashToCMOId(cmoId: string): string {
