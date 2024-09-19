@@ -139,12 +139,16 @@ export function includeCancerTypeFieldsInSearch(
   if (sampleMetadataFilters?.length) {
     // Extract the user query: searchValues equal ["someValue"] for a single-value search
     // and ["val1", "val2", "val3", ...] for a bulk search
-    const searchInput = Object.values(sampleMetadataFilters[0])[0] as
-      | string
-      | string[];
-    const searchValues = Array.isArray(searchInput)
-      ? searchInput
-      : [searchInput];
+    const searchValues = [
+      ...new Set(
+        sampleMetadataFilters.map((filter) => Object.values(filter)[0])
+      ),
+    ] as string[];
+
+    // Convert to regex values that are valid in JavaScript (no support for inline modifiers like (?i))
+    const regexValues = searchValues.map(
+      (val) => new RegExp(val.replace(/\(\?i\)/, ""), "i")
+    );
 
     // Search through the oncotreeCache for matching cancerType or cancerTypeDetailed values.
     // If there is a match, add the corresponding Oncotree code to the original search query
@@ -153,13 +157,11 @@ export function includeCancerTypeFieldsInSearch(
         code
       ) as CachedOncotreeData)!;
       if (
-        searchValues.some(
-          (val) =>
-            name?.toLowerCase().includes(val?.toLowerCase()) ||
-            mainType?.toLowerCase().includes(val?.toLowerCase())
+        regexValues.some(
+          (regexVal) => regexVal.test(name) || regexVal.test(mainType)
         )
       ) {
-        sampleMetadataFilters?.push({ oncotreeCode_IN: [code] });
+        sampleMetadataFilters?.push({ oncotreeCode: code });
       }
     });
   }
