@@ -12,29 +12,25 @@ import {
 import RecordsList from "../../components/RecordsList";
 import { useParams } from "react-router-dom";
 
-const typeNames = [
-  "igoProjectId",
-  "igoRequestId",
-  "projectManagerName",
-  "investigatorName",
-  "piEmail",
-  "dataAnalystName",
-  "dataAnalystEmail",
-  "genePanel",
-  "labHeadName",
-  "labHeadEmail",
-  "qcAccessEmails",
-  "dataAccessEmails",
-  "otherContactEmails",
-];
-
-const queryTerms = typeNames.map((tn) => `${tn}_MATCHES`);
-
 function requestFilterWhereVariables(
   parsedSearchVals: string[]
 ): RequestWhere[] {
   return parsedSearchVals.flatMap((searchVal) =>
-    queryTerms.map((queryTerm) => ({ [queryTerm]: `(?i).*${searchVal}.*` }))
+    [
+      "igoProjectId",
+      "igoRequestId",
+      "projectManagerName",
+      "investigatorName",
+      "piEmail",
+      "dataAnalystName",
+      "dataAnalystEmail",
+      "genePanel",
+      "labHeadName",
+      "labHeadEmail",
+      "qcAccessEmails",
+      "dataAccessEmails",
+      "otherContactEmails",
+    ].map((fieldName) => ({ [fieldName + "_MATCHES"]: `(?i).*${searchVal}.*` }))
   );
 }
 
