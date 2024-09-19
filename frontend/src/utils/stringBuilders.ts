@@ -41,3 +41,9 @@ export function buildTsvString(
 export function buildSentenceCaseString(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
+
+export function buildSearchValRegexString(searchVal: string) {
+  // .*$(searchVal).* performs a partial string match
+  // (?i) is a regex inline modifier that makes the search case-insensitive
+  return `(?i).*${searchVal}.*`;
+}

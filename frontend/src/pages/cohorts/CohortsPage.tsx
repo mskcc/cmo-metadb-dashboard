@@ -13,14 +13,15 @@ import {
 } from "../../shared/helpers";
 import RecordsList from "../../components/RecordsList";
 import { useParams } from "react-router-dom";
+import { buildSearchValRegexString } from "../../utils/stringBuilders";
 
 function cohortFilterWhereVariables(parsedSearchVals: string[]): CohortWhere[] {
   return parsedSearchVals.flatMap((searchVal) => [
-    { cohortId_MATCHES: `(?i).*${searchVal}.*` },
+    { cohortId_MATCHES: buildSearchValRegexString(searchVal) },
     {
       hasCohortSampleSamples_SOME: {
         hasMetadataSampleMetadata_SOME: {
-          primaryId_MATCHES: `(?i).*${searchVal}.*`,
+          primaryId_MATCHES: buildSearchValRegexString(searchVal),
         },
       },
     },
@@ -34,7 +35,8 @@ function cohortFilterWhereVariables(parsedSearchVals: string[]): CohortWhere[] {
       "date",
     ].map((cohortCompleteFieldName) => ({
       hasCohortCompleteCohortCompletes_SOME: {
-        [cohortCompleteFieldName + "_MATCHES"]: `(?i).*${searchVal}.*`,
+        [cohortCompleteFieldName + "_MATCHES"]:
+          buildSearchValRegexString(searchVal),
       },
     })),
   ]);

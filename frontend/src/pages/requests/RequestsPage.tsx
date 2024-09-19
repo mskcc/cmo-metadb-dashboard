@@ -11,6 +11,7 @@ import {
 } from "../../shared/helpers";
 import RecordsList from "../../components/RecordsList";
 import { useParams } from "react-router-dom";
+import { buildSearchValRegexString } from "../../utils/stringBuilders";
 
 function requestFilterWhereVariables(
   parsedSearchVals: string[]
@@ -30,7 +31,9 @@ function requestFilterWhereVariables(
       "qcAccessEmails",
       "dataAccessEmails",
       "otherContactEmails",
-    ].map((fieldName) => ({ [fieldName + "_MATCHES"]: `(?i).*${searchVal}.*` }))
+    ].map((fieldName) => ({
+      [fieldName + "_MATCHES"]: buildSearchValRegexString(searchVal),
+    }))
   );
 }
 

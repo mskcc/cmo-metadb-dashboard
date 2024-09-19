@@ -18,6 +18,7 @@ import { parseUserSearchVal } from "../utils/parseSearchQueries";
 import { Dispatch, SetStateAction } from "react";
 import moment from "moment";
 import _ from "lodash";
+import { buildSearchValRegexString } from "../utils/stringBuilders";
 
 export type SampleChange = {
   primaryId: string;

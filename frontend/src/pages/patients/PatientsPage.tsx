@@ -18,6 +18,7 @@ import {
 } from "../../shared/helpers";
 import { getUserEmail } from "../../utils/getUserEmail";
 import { openLoginPopup } from "../../utils/openLoginPopup";
+import { buildSearchValRegexString } from "../../utils/stringBuilders";
 
 // Mirror the field types in the CRDB, where CMO_ID is stored without the "C-" prefix
 export type PatientIdsTriplet = {
@@ -32,13 +33,13 @@ function patientFilterWhereVariables(
   return parsedSearchVals.flatMap((searchVal) => [
     {
       patientAliasesIsAlias_SOME: {
-        value_MATCHES: `(?i).*${searchVal}.*`,
+        value_MATCHES: buildSearchValRegexString(searchVal),
       },
     },
     {
       hasSampleSamples_SOME: {
         hasMetadataSampleMetadata_SOME: {
-          cmoSampleName_MATCHES: `(?i).*${searchVal}.*`,
+          cmoSampleName_MATCHES: buildSearchValRegexString(searchVal),
         },
       },
     },
