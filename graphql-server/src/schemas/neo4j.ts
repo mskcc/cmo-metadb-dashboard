@@ -2,12 +2,7 @@ import neo4j from "neo4j-driver";
 import { Neo4jGraphQL } from "@neo4j/graphql";
 import { OGM } from "@neo4j/graphql-ogm";
 import { toGraphQLTypeDefs } from "@neo4j/introspector";
-import { createHttpLink } from "apollo-link-http";
-import { InMemoryCache, NormalizedCacheObject } from "apollo-cache-inmemory";
 import { SortDirection } from "../generated/graphql";
-const fetch = require("node-fetch");
-const request = require("request-promise-native");
-import { ApolloClient } from "apollo-client";
 import { gql } from "apollo-server";
 import {
   flattenedCohortFields,
@@ -23,16 +18,6 @@ type SortOptions = { [key: string]: SortDirection }[];
 export async function buildNeo4jDbSchema() {
   const sessionFactory = () =>
     neo4jDriver.session({ defaultAccessMode: neo4j.session.WRITE });
-
-  const httpLink = createHttpLink({
-    uri: "https://localhost:4000/graphql",
-    fetch: fetch,
-  });
-
-  const client = new ApolloClient({
-    link: httpLink,
-    cache: new InMemoryCache(),
-  });
 
   const typeDefs = await toGraphQLTypeDefs(sessionFactory, false);
   const extendedTypeDefs = gql`
@@ -65,24 +50,24 @@ export async function buildNeo4jDbSchema() {
     }
   `;
 
-  // NOTE: we do not need the ID feature but this is something we might be interested in later on
   const features = {
     filters: {
       String: {
         MATCHES: true,
-        ID: {
-          MATCHES: true,
-        },
       },
     },
   };
 
-  const ogm = new OGM({ typeDefs: extendedTypeDefs, driver: neo4jDriver, features });
+  const ogm = new OGM({
+    typeDefs: extendedTypeDefs,
+    driver: neo4jDriver,
+    features,
+  });
   const neoSchema = new Neo4jGraphQL({
     typeDefs: extendedTypeDefs,
     driver: neo4jDriver,
     validate: false,
-    resolvers: buildResolvers(ogm, client),
+    resolvers: buildResolvers(ogm),
     features,
   });
 
@@ -95,10 +80,7 @@ export async function buildNeo4jDbSchema() {
   };
 }
 
-function buildResolvers(
-  ogm: OGM,
-  apolloClient: ApolloClient<NormalizedCacheObject>
-) {
+function buildResolvers(ogm: OGM) {
   return {
     Query: {
       async requests(_source: undefined, args: any) {

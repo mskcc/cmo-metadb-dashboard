@@ -1,12 +1,9 @@
 import fetch from "node-fetch";
 import NodeCache from "node-cache";
 import { props } from "./constants";
-import {
-  InputMaybe,
-  SampleMetadataWhere,
-  SampleWhere,
-} from "../generated/graphql";
+import { InputMaybe, SampleWhere } from "../generated/graphql";
 import { GraphQLWhereArg } from "@neo4j/graphql/dist/types";
+import { neo4jDriver } from "./servers";
 
 /**
  * Source: https://oncotree.mskcc.org/#/home?tab=api
@@ -101,12 +98,12 @@ async function getOncotreeCodesFromNeo4j() {
   try {
     const result = await session.writeTransaction((tx) =>
       tx.run(`
-        MATCH (s:SampleMetadata) RETURN DISTINCT s.oncotreeCode AS oncotreeCode
+        MATCH (sm:SampleMetadata) RETURN DISTINCT sm.oncotreeCode AS oncotreeCode
       `)
     );
     return new Set(
       result.records.map((record) => record.get("oncotreeCode")).filter(Boolean)
-    );
+    ) as Set<string>;
   } catch (error) {
     if (error instanceof Error) {
       console.error(error.message);
